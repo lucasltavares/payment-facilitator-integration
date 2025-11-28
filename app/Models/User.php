@@ -46,4 +46,20 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+    /**
+     * Get all PIX payments for the user
+     */
+    public function pixPayments()
+    {
+        return $this->hasMany(PixPayment::class);
+    }
+
+    /**
+     * Get all withdrawals for the user
+     */
+    public function withdrawals()
+    {
+        return $this->hasMany(Withdrawal::class);
+    }
 }
