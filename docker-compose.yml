@@ -1,0 +1,84 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: payment-facilitator-app
+    restart: unless-stopped
+    working_dir: /var/www/html
+    volumes:
+      - ./:/var/www/html
+    networks:
+      - payment-network
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    environment:
+      - DB_CONNECTION=mysql
+      - DB_HOST=mysql
+      - DB_PORT=3306
+      - DB_DATABASE=payment_facilitator
+      - DB_USERNAME=laravel
+      - DB_PASSWORD=laravel_password
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - APP_ENV=local
+      - APP_DEBUG=true
+      - APP_URL=http://localhost:9000
+
+  nginx:
+    image: nginx:alpine
+    container_name: payment-facilitator-nginx
+    restart: unless-stopped
+    ports:
+      - "9000:80"
+    volumes:
+      - ./:/var/www/html
+      - ./docker/nginx.conf:/etc/nginx/conf.d/default.conf
+    networks:
+      - payment-network
+    depends_on:
+      - app
+
+  mysql:
+    image: mysql:8.0
+    container_name: payment-facilitator-mysql
+    restart: unless-stopped
+    ports:
+      - "3307:3306"
+    environment:
+      - MYSQL_DATABASE=payment_facilitator
+      - MYSQL_USER=laravel
+      - MYSQL_PASSWORD=laravel_password
+      - MYSQL_ROOT_PASSWORD=root_password
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - payment-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-proot_password"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:alpine
+    container_name: payment-facilitator-redis
+    restart: unless-stopped
+    ports:
+      - "6380:6379"
+    networks:
+      - payment-network
+
+networks:
+  payment-network:
+    driver: bridge
+
+volumes:
+  mysql_data:
+    driver: local
+

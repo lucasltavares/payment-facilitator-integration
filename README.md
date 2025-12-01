@@ -7,6 +7,69 @@
 <a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
 </p>
 
+## Docker Setup
+
+This project includes a Docker Compose configuration for easy development setup.
+
+### Quick Start
+
+To run the entire application with one command:
+
+```bash
+docker-compose up -d
+```
+
+This will start:
+- **PHP 8.2** application container (with Composer and Node.js)
+- **Nginx** web server (accessible at http://localhost:9000)
+- **MySQL 8.0** database
+- **Redis** for caching
+
+The setup script will automatically:
+- Install Composer and NPM dependencies
+- Create `.env` file if it doesn't exist
+- Generate application key
+- Run database migrations
+- Set proper file permissions
+
+### Accessing the Application
+
+- **Web Application**: http://localhost:9000
+- **MySQL**: localhost:3306 (user: `laravel`, password: `laravel_password`, database: `payment_facilitator`)
+- **Redis**: localhost:6379
+
+### Useful Commands
+
+```bash
+# Start containers
+docker-compose up -d
+
+# Stop containers
+docker-compose down
+
+# View logs
+docker-compose logs -f
+
+# Execute commands in the app container
+docker-compose exec app php artisan migrate
+docker-compose exec app composer install
+docker-compose exec app npm install
+
+# Rebuild containers after changes
+docker-compose up -d --build
+```
+
+### Stopping the Application
+
+```bash
+docker-compose down
+```
+
+To also remove volumes (database data):
+```bash
+docker-compose down -v
+```
+
 ## About Laravel
 
 Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
